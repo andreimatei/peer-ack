@@ -1,0 +1,32 @@
+#wrapper {
+  text-align: center;
+  animation-name: slideDown;
+  animation-duration: 10s;
+  animation-iteration-count: 1;
+
+  position: absolute;
+  z-index: -1;
+  top: -50;
+  left: 0;
+  right: 0;
+}
+
+#butterbar {
+  display: inline-block;
+  width: 200px; 
+  background: #fde073;  /* yellow */
+  box-shadow:         0 0 5px black;
+  line-height: 2.5;
+  overflow: hidden; 
+}
+
+@keyframes slideDown {
+    0% { transform: translateY(-50px); }
+    10% { transform: translateY(50px); }
+    80% { transform: translateY(50px); }
+    100% { transform: translateY(-50px); }
+}
+
+fieldset {
+    border: 0;
+}
