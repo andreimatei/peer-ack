@@ -91,3 +91,4 @@ class Util:
 
     def is_superuser(email):
         return email in Config.superusers
+

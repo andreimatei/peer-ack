@@ -3,7 +3,7 @@ import pytz
 import urllib
 from urllib.parse import urlparse
 
-from common import Page, Ack
+from common import Page, Ack, DB
 from config import Config, Util, Constants
 
 class MyAcks(Page):
@@ -26,6 +26,9 @@ class MyAcks(Page):
         if b'delete-id' in data:
             del_id = data[b'delete-id'][0].decode("utf-8")
             self.delete_ack(del_id)
+        if b'delete-eng-update-id' in data:
+            del_id = data[b'delete-eng-update-id'][0].decode("utf-8")
+            self.delete_eng_update(del_id)
         self.render_page(handler)
 
     def render_not_logged_in(self, handler):
@@ -45,6 +48,7 @@ class MyAcks(Page):
         <body>
         <form method=post action=/myacks accept-charset="UTF-8" id="action-form">
             <input type="hidden" name="delete-id" id="delete-id">
+            <input type="hidden" name="delete-eng-update-id" id="delete-eng-update-id">
         </form>
         """)
         user_email = self.get_user_email(handler)
@@ -70,6 +74,12 @@ class MyAcks(Page):
                 msg="My acks for week:",
         )
         self.get_my_acks(handler.wfile, user_email, report)
+        self.write(handler.wfile, """
+            <p>My suggested eng updates:<br>
+            <table border="1">
+        """)
+        self.render_my_eng_updates(handler.wfile, user_email, report)
+
 
     def get_my_acks(self, wfile, email, report):
         conn = Util.get_db_conn()
@@ -97,6 +107,14 @@ class MyAcks(Page):
         </tr>
         """ % (ack.msg, ack.id))
 
+    def delete_eng_update(self, update_id):
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM eng_updates WHERE id=%s", (update_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
     def delete_ack(self, ack_id):
         conn = Util.get_db_conn()
         cur = conn.cursor()
@@ -123,5 +141,25 @@ class MyAcks(Page):
             var form = document.getElementById("action-form");
             form.submit();
         }
+
+        function delete_eng_update(id) {
+            document.getElementById("delete-eng-update-id").value = id;
+            var form = document.getElementById("action-form");
+            form.submit();
+        }
         </script>
         """
+
+    def render_my_eng_updates(self, wfile, email, report):
+        updates = DB.get_eng_updates(report, email)
+        for upd in updates:
+            self.write(wfile, """
+            <tr>
+                <td><pre>%s</pre></td>
+                <td>
+                    <button type="button" onclick="delete_eng_update('%s')" style="cursor:pointer">
+                        <img src="/del.png" width="24">
+                    </button>
+                </td>
+            </tr>
+            """ % (upd.msg, upd.id))

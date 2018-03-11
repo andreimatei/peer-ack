@@ -14,6 +14,11 @@ class Ack:
         # contains new lines that must be preserved.
         self.pre = '\n' in msg
 
+class EngUpdate:
+    def __init__(self, id, msg):
+        self.id = id
+        self.msg = msg
+
 class PAGE(Enum):
     Ack = 1
     MyAcks = 2
@@ -136,3 +141,21 @@ class Page:
         </div>
         """.format(general_report)
         self.write(wfile, menu)
+
+class DB:
+    def get_eng_updates(report, user_email):
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        if user_email is None:
+            cur.execute("SELECT id, msg FROM eng_updates WHERE "+
+                    "inserted_at>%s AND inserted_at<%s",
+                    (report.start, report.end))
+        else:
+            cur.execute("SELECT id, msg FROM eng_updates WHERE "+
+                    "inserted_at>%s AND inserted_at<%s AND user_email=%s",
+                    (report.start, report.end, user_email))
+        updates_raw = cur.fetchall()
+        updates = [EngUpdate(id=upd[0], msg=upd[1]) for upd in updates_raw]
+        cur.close()
+        conn.close()
+        return updates

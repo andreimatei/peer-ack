@@ -3,7 +3,7 @@ import pytz
 import urllib.parse
 from urllib.parse import urlparse
 
-from common import Page, Ack
+from common import Page, Ack, DB
 from config import Config, Util, Constants
 
 class Report(Page):
@@ -47,6 +47,7 @@ class Report(Page):
 
         self.write(handler.wfile, "Report for the current week:")
         self.get_acks(handler.wfile, report)
+        self.render_eng_updates(handler.wfile)
 
     def get_acks(self, wfile, report):
         conn = Util.get_db_conn()
@@ -84,3 +85,13 @@ class Report(Page):
         s += "</ol>"
         return s
         
+    def render_eng_updates(self, wfile):
+        self.write(wfile, "<p>Suggested eng updates:<br>")
+        now = datetime.datetime.now(pytz.utc)
+        report = Util.report(now)
+        updates = DB.get_eng_updates(report, None)
+        s = "<ol>"
+        for upd in updates:
+                s += "<li>{0}</li>".format(upd.msg)
+        s += "</ol>"
+        self.write(wfile, s)

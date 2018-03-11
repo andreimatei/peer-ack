@@ -31,6 +31,7 @@ class PeerAckHTTPHandler(BaseHTTPRequestHandler):
             "/myacks": MyAcks(),
             "/report": Report(),
             "/favicon.ico": functools.partial(self.serve_file, "image/x-icon", "favicon.ico"),
+            "/question-mark.png": functools.partial(self.serve_file, "image/x-png", "question-mark.png"),
             "/site.css": functools.partial(self.serve_file, "text/css", "site.css"),
             "/test.html": functools.partial(self.serve_file, "text/html", "test.html"),
             "/auth.js": functools.partial(self.serve_file, "application/javascript", "auth.js"),

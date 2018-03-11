@@ -4,7 +4,7 @@ import datetime
 import pytz
 from http import cookies
 
-from common import Page
+from common import Page, EngUpdate, DB
 from config import Config, Util
 
 class Ack(Page):
@@ -44,10 +44,29 @@ class Ack(Page):
                     Haiku (one multi-line ack):<br><textarea name=haiku rows="4" cols="80"></textarea><br>
                     <input type=submit><br>
                 </fieldset>
+
+                <fieldset id="fieldset-eng-updates" disabled="true">
+                    Engineering updates: <img src="question-mark.png" height="16px" title="Suggest eng updates to Peter. Brag about your PR, your friend's PR, shout about a scary issue.">
+                    <br><textarea name=eng-updates rows="4" cols="80"></textarea><br>
+                    <input type=submit><br>
+                </fieldset>
             </form>
-            </body>
         """
         self.write(handler.wfile, msg)
+           
+        self.write(handler.wfile, "<p>Suggested eng updates:<br>")
+        userID = self.get_user_email(handler)
+        if userID is None:
+            self.write(handler.wfile, "Not logged in")
+        else:
+            self.write(handler.wfile, "\n<table>\n")
+            now = datetime.datetime.now(pytz.utc)
+            report = Util.report(now)
+            eng_updates = DB.get_eng_updates(report, None)
+            for update in eng_updates:
+                self.render_eng_update(handler.wfile, update)
+            self.write(handler.wfile, "\n</table>\n")
+        self.write(handler.wfile, "\n</body>\n")
 
     def do_post(self, handler):
         userID = self.get_user_email(handler)
@@ -67,6 +86,10 @@ class Ack(Page):
             haiku = data[b'haiku'][0].decode("utf-8")
             num_acks += 1
         self.insert_acks(userID, acks, haiku)
+
+        if b'eng-updates' in data:
+            update = data[b'eng-updates'][0].decode("utf-8")
+            self.insert_eng_update(userID, update)
 
         handler.send_response(303) # "See-also" code.
         self.set_inserted_cookie(handler, num_acks)
@@ -103,11 +126,23 @@ class Ack(Page):
         cur.close()
         conn.close()
 
+    def insert_eng_update(self, user, eng_update):
+        now = datetime.datetime.now(pytz.utc)
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute(
+                "INSERT INTO eng_updates (msg, inserted_at, user_email) VALUES (%s, %s, %s)",
+                (eng_update, now, user))
+        conn.commit()
+        cur.close()
+        conn.close()
+
     def head(self):
         return """
         <script>
         function page_toggleSignedIn(signedIn, info) {
             document.getElementById("fieldset").disabled = !signedIn;
+            document.getElementById("fieldset-eng-updates").disabled = !signedIn;
         }
         </script>
         """
@@ -124,3 +159,10 @@ class Ack(Page):
         if 'just-inserted' not in c:
             return 0
         return int(c['just-inserted'].value)
+
+    def render_eng_update(self, wfile, update):
+        self.write(wfile, """
+        <tr>
+            <td><pre>%s</pre></td>
+        </tr>
+        """ % (update.msg))
