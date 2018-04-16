@@ -84,7 +84,7 @@ class MyAcks(Page):
         self.get_my_acks(handler.wfile, user_email, report)
         self.render_my_eng_updates(handler.wfile, user_email, report)
         self.render_my_bounties(handler.wfile, user_email)
-
+        self.write(handler.wfile, "</body></html>")
 
     def get_my_acks(self, wfile, email, report):
         conn = Util.get_db_conn()

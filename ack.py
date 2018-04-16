@@ -70,7 +70,7 @@ class Ack(Page):
             for update in eng_updates:
                 self.render_eng_update(handler.wfile, update)
             self.write(handler.wfile, "\n</table>\n")
-        self.write(handler.wfile, "\n</body>\n")
+        self.write(handler.wfile, "\n</body></html>\n")
 
     def do_post(self, handler):
         userID = self.get_user_email(handler)

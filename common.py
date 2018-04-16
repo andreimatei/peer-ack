@@ -58,6 +58,7 @@ class Page:
 
     def common_headers(self, wfile):
         hdr = """
+        <html>
         <head>
         <link rel="stylesheet" type="text/css" href="site.css">
         <script>
@@ -70,6 +71,10 @@ class Page:
 
     def get_id_token(self, handler):
         cookiestring = "\n".join(handler.headers.get_all('Cookie',failobj=[]))
+        # Sometimes we get a cookie string like "G_AUTHUSER_H=0; ;
+        # id-token=...". The "; ;" breaks everything. I have no idea where it
+        # comes from, but I strip it out.
+        cookiestring = cookiestring.replace("; ;", ";", 1)
         c = cookies.SimpleCookie()
         c.load(cookiestring)
         if 'id-token' not in c:

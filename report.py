@@ -48,6 +48,7 @@ class Report(Page):
         self.write(handler.wfile, "Report for the current week:")
         self.get_acks(handler.wfile, report)
         self.render_eng_updates(handler.wfile)
+        self.write(handler.wfile, "</body></html>\n")
 
     def get_acks(self, wfile, report):
         conn = Util.get_db_conn()
