@@ -29,6 +29,12 @@ class MyAcks(Page):
         if b'delete-eng-update-id' in data:
             del_id = data[b'delete-eng-update-id'][0].decode("utf-8")
             self.delete_eng_update(del_id)
+        if b'delete-bounty-id' in data:
+            del_id = data[b'delete-bounty-id'][0].decode("utf-8")
+            self.delete_bounty(del_id)
+        if b'close-bounty-id' in data:
+            del_id = data[b'close-bounty-id'][0].decode("utf-8")
+            self.close_bounty(del_id)
         self.render_page(handler)
 
     def render_not_logged_in(self, handler):
@@ -49,6 +55,8 @@ class MyAcks(Page):
         <form method=post action=/myacks accept-charset="UTF-8" id="action-form">
             <input type="hidden" name="delete-id" id="delete-id">
             <input type="hidden" name="delete-eng-update-id" id="delete-eng-update-id">
+            <input type="hidden" name="delete-bounty-id" id="delete-bounty-id">
+            <input type="hidden" name="close-bounty-id" id="close-bounty-id">
         </form>
         """)
         user_email = self.get_user_email(handler)
@@ -74,11 +82,8 @@ class MyAcks(Page):
                 msg="My acks for week:",
         )
         self.get_my_acks(handler.wfile, user_email, report)
-        self.write(handler.wfile, """
-            <p>My suggested eng updates:<br>
-            <table border="1">
-        """)
         self.render_my_eng_updates(handler.wfile, user_email, report)
+        self.render_my_bounties(handler.wfile, user_email)
 
 
     def get_my_acks(self, wfile, email, report):
@@ -123,6 +128,22 @@ class MyAcks(Page):
         cur.close()
         conn.close()
 
+    def delete_bounty(self, bounty_id):
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM bounties WHERE id=%s", (bounty_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def close_bounty(self, bounty_id):
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("update bounties set active=false where id=%s", (bounty_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
     def head(self):
         return """
         <script>
@@ -147,10 +168,26 @@ class MyAcks(Page):
             var form = document.getElementById("action-form");
             form.submit();
         }
+
+        function delete_bounty(id) {
+            document.getElementById("delete-bounty-id").value = id;
+            var form = document.getElementById("action-form");
+            form.submit();
+        }
+
+        function close_bounty(id) {
+            document.getElementById("close-bounty-id").value = id;
+            var form = document.getElementById("action-form");
+            form.submit();
+        }
         </script>
         """
 
     def render_my_eng_updates(self, wfile, email, report):
+        self.write(wfile, """
+            <p>My suggested eng updates:<br>
+            <table border="1">
+        """)
         updates = DB.get_eng_updates(report, email)
         for upd in updates:
             self.write(wfile, """
@@ -163,3 +200,33 @@ class MyAcks(Page):
                 </td>
             </tr>
             """ % (upd.msg, upd.id))
+        self.write(wfile, "</table>")
+
+    def render_my_bounties(self, wfile, email):
+        self.write(wfile, """
+            <p>My bounties:<br>
+            <table border="1">
+                <th>Status</th>
+                <th>Bounty</th>
+                <th>Updated</th>
+                <th>Actions</th>
+        """)
+        bounties = DB.get_user_bounties(email)
+        for b in bounties:
+            status = "open" if bool(b.active) else "closed"
+            self.write(wfile, """
+            <tr>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>
+                    <button type="button" onclick="close_bounty('%s')" style="cursor:pointer">
+                        <img src="/check.png" width="24">
+                    </button>
+                    <button type="button" onclick="delete_bounty('%s')" style="cursor:pointer">
+                        <img src="/del.png" width="24">
+                    </button>
+                </td>
+            </tr>
+            """ % (status, b.msg, b.updated.strftime("%Y-%m-%d"), b.id, b.id))
+        self.write(wfile, "</table>")

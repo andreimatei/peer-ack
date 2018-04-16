@@ -37,6 +37,7 @@ class PeerAckHTTPHandler(BaseHTTPRequestHandler):
             "/auth.js": functools.partial(self.serve_file, "application/javascript", "auth.js"),
             "/common.js": functools.partial(self.serve_file, "application/javascript", "common.js"),
             "/del.png": functools.partial(self.serve_file, "image/png", "del.png"),
+            "/check.png": functools.partial(self.serve_file, "image/png", "check.png"),
         }
         super(BaseHTTPRequestHandler, self).__init__(request, client_address, server)
 

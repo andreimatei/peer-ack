@@ -19,6 +19,15 @@ class EngUpdate:
         self.id = id
         self.msg = msg
 
+class Bounty:
+    def __init__(self, id, author, created, updated, msg, active):
+        self.id = id
+        self.author = author
+        self.created = created
+        self.updated = updated
+        self.msg = msg
+        self.active = active
+
 class PAGE(Enum):
     Ack = 1
     MyAcks = 2
@@ -159,3 +168,39 @@ class DB:
         cur.close()
         conn.close()
         return updates
+
+    def get_closed_bounties():
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("select id, author, created, updated, msg, active "+
+            "from bounties where active = false order by updated desc")
+        bounties_raw = cur.fetchall()
+        bounties = [Bounty(id=b[0], author=b[1], created=b[2],
+            updated=b[3], msg=b[4], active=b[5]) for b in bounties_raw]
+        cur.close()
+        conn.close()
+        return bounties
+
+    def get_open_bounties():
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("select id, author, created, updated, msg, active "+
+            "from bounties where active = true order by updated desc")
+        bounties_raw = cur.fetchall()
+        bounties = [Bounty(id=b[0], author=b[1], created=b[2],
+            updated=b[3], msg=b[4], active=b[5]) for b in bounties_raw]
+        cur.close()
+        conn.close()
+        return bounties
+
+    def get_user_bounties(email):
+        conn = Util.get_db_conn()
+        cur = conn.cursor()
+        cur.execute("select id, author, created, updated, msg, active "+
+            "from bounties where author = '%s' order by updated desc" % (email))
+        bounties_raw = cur.fetchall()
+        bounties = [Bounty(id=b[0], author=b[1], created=b[2],
+            updated=b[3], msg=b[4], active=b[5]) for b in bounties_raw]
+        cur.close()
+        conn.close()
+        return bounties
