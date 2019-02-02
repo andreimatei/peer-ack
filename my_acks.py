@@ -11,13 +11,13 @@ class MyAcks(Page):
         return "my_acks"
 
     def do_get(self, handler):
-        if self.get_user_email(handler) is None:
+        if Auth.get_user_email(handler) is None:
             self.render_not_logged_in(handler)
             return
         self.render_page(handler)
 
     def do_post(self, handler):
-        if self.get_user_email(handler) is None:
+        if Auth.get_user_email(handler) is None:
             self.render_not_logged_in(handler)
             return
         content_len = int(handler.headers["content-length"])
@@ -59,7 +59,7 @@ class MyAcks(Page):
             <input type="hidden" name="close-bounty-id" id="close-bounty-id">
         </form>
         """)
-        user_email = self.get_user_email(handler)
+        user_email = Auth.get_user_email(handler)
         self.menu_bar(handler.wfile, Util.is_superuser(user_email))
 
         # If there's a report start time specified use that. Otherwise,

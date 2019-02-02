@@ -17,6 +17,7 @@ from ack import Ack
 from my_acks import MyAcks
 from report import Report
 from config import Config
+import inforad
 
 class Verb(Enum):
     GET = 1
@@ -30,14 +31,17 @@ class PeerAckHTTPHandler(BaseHTTPRequestHandler):
             "/ack": Ack(),
             "/myacks": MyAcks(),
             "/report": Report(),
+            "/acks": functools.partial(inforad.serve, self),
             "/favicon.ico": functools.partial(self.serve_file, "image/x-icon", "favicon.ico"),
             "/question-mark.png": functools.partial(self.serve_file, "image/x-png", "question-mark.png"),
             "/site.css": functools.partial(self.serve_file, "text/css", "site.css"),
             "/test.html": functools.partial(self.serve_file, "text/html", "test.html"),
+            "/inforad.html": functools.partial(self.serve_file, "text/html", "inforad.html"),
             "/auth.js": functools.partial(self.serve_file, "application/javascript", "auth.js"),
             "/common.js": functools.partial(self.serve_file, "application/javascript", "common.js"),
             "/del.png": functools.partial(self.serve_file, "image/png", "del.png"),
             "/check.png": functools.partial(self.serve_file, "image/png", "check.png"),
+            "/logo.png": functools.partial(self.serve_file, "image/png", "logo.png"),
         }
         super(BaseHTTPRequestHandler, self).__init__(request, client_address, server)
 

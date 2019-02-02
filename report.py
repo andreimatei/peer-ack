@@ -11,7 +11,7 @@ class Report(Page):
         return "report"
 
     def do_get(self, handler):
-        if self.get_user_email(handler) is None:
+        if Auth.get_user_email(handler) is None:
             self.render_not_logged_in(handler)
             return
         self.render_page(handler)
@@ -30,7 +30,7 @@ class Report(Page):
         handler.end_headers()
         self.common_headers(handler.wfile)
         self.write(handler.wfile, "<body>\n")
-        user_email = self.get_user_email(handler)
+        user_email = Auth.get_user_email(handler)
         self.menu_bar(handler.wfile, Util.is_superuser(user_email))
 
         # If there's a report start time specified use that. Otherwise,
@@ -85,7 +85,7 @@ class Report(Page):
                 s += "<li>{0}</li>".format(ack.msg)
         s += "</ol>"
         return s
-        
+
     def render_eng_updates(self, wfile):
         self.write(wfile, "<p>Suggested eng updates:<br>")
         now = datetime.datetime.now(pytz.utc)

@@ -69,29 +69,6 @@ class Page:
         """ % (self.cur_page_id(), self.head())
         self.write(wfile, hdr)
 
-    def get_id_token(self, handler):
-        cookiestring = "\n".join(handler.headers.get_all('Cookie',failobj=[]))
-        # Sometimes we get a cookie string like "G_AUTHUSER_H=0; ;
-        # id-token=...". The "; ;" breaks everything. I have no idea where it
-        # comes from, but I strip it out.
-        cookiestring = cookiestring.replace("; ;", ";", 1)
-        c = cookies.SimpleCookie()
-        c.load(cookiestring)
-        if 'id-token' not in c:
-            return None
-        return c['id-token'].value
-
-    def get_user_email(self, handler):
-        token = self.get_id_token(handler)
-        if token is None:
-            return None
-        try:
-            email = auth.token_to_email(token)
-            return email
-        except Exception as e:
-            print(e)
-            return None
-
     """
     report (Util.ReportWindow):
     generate_links (bool): If set, links for the previous/next weeks will be
@@ -155,6 +132,30 @@ class Page:
         </div>
         """.format(general_report)
         self.write(wfile, menu)
+
+class Auth:
+    def get_id_token(handler):
+        cookiestring = "\n".join(handler.headers.get_all('Cookie',failobj=[]))
+        # Sometimes we get a cookie string like "G_AUTHUSER_H=0; ;
+        # id-token=...". The "; ;" breaks everything. I have no idea where it
+        # comes from, but I strip it out.
+        cookiestring = cookiestring.replace("; ;", ";", 1)
+        c = cookies.SimpleCookie()
+        c.load(cookiestring)
+        if 'id-token' not in c:
+            return None
+        return c['id-token'].value
+
+    def get_user_email(handler):
+        token = Auth.get_id_token(handler)
+        if token is None:
+            return None
+        try:
+            email = auth.token_to_email(token)
+            return email
+        except Exception as e:
+            print(e)
+        return None
 
 class DB:
     def get_eng_updates(report, user_email):

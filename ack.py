@@ -4,7 +4,7 @@ import datetime
 import pytz
 from http import cookies
 
-from common import Page, EngUpdate, DB
+from common import Page, EngUpdate, DB, Auth
 from config import Config, Util
 
 class Ack(Page):
@@ -18,7 +18,7 @@ class Ack(Page):
 
         self.common_headers(handler.wfile)
         self.write(handler.wfile, "<body>")
-        user_email = self.get_user_email(handler)
+        user_email = Auth.get_user_email(handler)
         self.menu_bar(handler.wfile, Util.is_superuser(user_email))
 
         num_acks, bounty = self.just_inserted(handler)
@@ -57,9 +57,9 @@ class Ack(Page):
             </form>
         """
         self.write(handler.wfile, msg)
-           
+
         self.write(handler.wfile, "<p>Suggested eng updates:<br>")
-        userID = self.get_user_email(handler)
+        userID = Auth.get_user_email(handler)
         if userID is None:
             self.write(handler.wfile, "Not logged in")
         else:
@@ -73,7 +73,7 @@ class Ack(Page):
         self.write(handler.wfile, "\n</body></html>\n")
 
     def do_post(self, handler):
-        userID = self.get_user_email(handler)
+        userID = Auth.get_user_email(handler)
         if userID is None:
             raise Exception("not logged in")
         # Decode and insert the acks.
