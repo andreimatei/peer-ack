@@ -1,10 +1,11 @@
+import json
 import urllib
 from urllib.parse import urlparse
 import datetime
 import pytz
 from http import cookies
 
-from common import Page, EngUpdate, DB
+from common import Page, EngUpdate, DB, Auth
 from config import Config, Util
 
 class Ack(Page):
@@ -18,7 +19,7 @@ class Ack(Page):
 
         self.common_headers(handler.wfile)
         self.write(handler.wfile, "<body>")
-        user_email = self.get_user_email(handler)
+        user_email = Auth.get_user_email(handler)
         self.menu_bar(handler.wfile, Util.is_superuser(user_email))
 
         num_acks, bounty = self.just_inserted(handler)
@@ -57,9 +58,9 @@ class Ack(Page):
             </form>
         """
         self.write(handler.wfile, msg)
-           
+
         self.write(handler.wfile, "<p>Suggested eng updates:<br>")
-        userID = self.get_user_email(handler)
+        userID = Auth.get_user_email(handler)
         if userID is None:
             self.write(handler.wfile, "Not logged in")
         else:
@@ -73,7 +74,7 @@ class Ack(Page):
         self.write(handler.wfile, "\n</body></html>\n")
 
     def do_post(self, handler):
-        userID = self.get_user_email(handler)
+        userID = Auth.get_user_email(handler)
         if userID is None:
             raise Exception("not logged in")
         # Decode and insert the acks.
@@ -198,7 +199,7 @@ class Ack(Page):
         if num_acks:
             c['just-inserted'] = "acks:%d" % (num_acks)
         elif bounty:
-            c['just-inserted'] = "bounty:1" 
+            c['just-inserted'] = "bounty:1"
         handler.send_header('Set-Cookie',c.output(header=''))
 
     def just_inserted(self, handler):
@@ -213,7 +214,7 @@ class Ack(Page):
                 acks = int(val[5:])
             elif val.startswith("bounty:"):
                 bounty = True
-        return (acks, bounty)            
+        return (acks, bounty)
 
     def render_eng_update(self, wfile, update):
         self.write(wfile, """
@@ -250,3 +251,19 @@ class Ack(Page):
         cur.close()
         conn.close()
         return True
+
+def serve_acks(handler, verb):
+  user_email = Auth.get_user_email(handler)
+  handler.send_response(200)
+  handler.send_header('Content-type', 'application/json')
+  handler.end_headers()
+  now = datetime.datetime.now(pytz.utc)
+  report = Util.ReportWindow(now + datetime.timedelta(days=-7), now)
+  conn = Util.get_db_conn()
+  cur = conn.cursor()
+  cur.execute("SELECT msg FROM ack WHERE inserted_at>%s AND inserted_at<%s", (report.start, report.end))
+  acks = cur.fetchall()
+  handler.wfile.write(bytes(json.dumps({"acks": [ack[0] for ack in acks]}), "utf8"))
+  cur.close()
+  conn.close()
+  return

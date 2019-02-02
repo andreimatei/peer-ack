@@ -32,11 +32,11 @@ class Config:
 
 class Constants:
     datetime_fmt = '%Y-%m-%d %H:%M'
- 
 
 class Util:
     def get_db_conn():
         conn = psycopg2.connect(Config.conn_string)
+        #conn = psycopg2.connect(dbname='peer_ack', user='acky', sslrootcert='certs/ca.crt', sslcert='certs/client.acky.crt', sslkey='certs/client.acky.key', host='cockroach-catrina-0001.crdb.io', port='26257', sslmode='verify-full')
         return conn
 
     ReportWindow = namedtuple('Report', ['start', 'end'])
