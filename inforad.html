@@ -84,7 +84,7 @@ d3.select("body")
 
 function advance() {
   if (advanceCount % refetchCycle == 0) {
-    d3.json("/acks").then(function(json) {
+    d3.json("/acks", {credentials: "same-origin"}).then(function(json) {
       data = json.acks;
       dataIndex = dataIndex % data.length;
     });
