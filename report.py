@@ -3,7 +3,7 @@ import pytz
 import urllib.parse
 from urllib.parse import urlparse
 
-from common import Page, Ack, DB
+from common import Page, Ack, DB, Auth
 from config import Config, Util, Constants
 
 class Report(Page):
