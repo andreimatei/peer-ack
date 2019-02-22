@@ -1,63 +1,71 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<html>
 
 <head>
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-</head>
 
 <style>
 html, body {
   height: 100%;
   margin: 0;
+  box-sizing: border-box;
 }
 
 body {
   font-family: 'Roboto', sans-serif;
   color: white;
-  background-color: #152849ff;
+  background-color: #152849;
+  display: flex;
+  flex-direction: column;
+  padding: 2vh;
 }
 
 .fullscreen {
-  min-width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
 }
 
 .ack-text {
-  font-size: 120px;
   text-align: center;
-  position: absolute;
+  white-space: pre-wrap;
+  width: 100%;
+  height: 100%;
 }
 
 .logo {
-  width: 100%;
-  bottom: 0px;
-  position: absolute;
   display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
 .logo-text {
-  width: 100%;
-  text-align: right;
   font-size: 60px;
   font-weight: bold;
   color: #82cc00;
 }
-
 </style>
+</head>
 
 <body>
   <script src="https://d3js.org/d3.v5.min.js"></script>
 
-  <div class="fullscreen"><span class="ack-text">Take a moment to appreciate your colleagues!</span></div>
+  <div class="fullscreen"><div class="ack-text">Take a moment to appreciate your colleagues!</div></div>
   <div class="logo">
     <img src="logo.png" height="50px"/>
     <span class="logo-text">Peer Acks</span>
   </div>
-  <script>
 
+<script>
+// TextFit 2.3.1 by STRML
+// from https://github.com/STRML/textFit
+// License: MIT
+(function (root, factory) { "use strict"; if (typeof define === "function" && define.amd) { define([], factory) } else if (typeof exports === "object") { module.exports = factory() } else { root.textFit = factory() } })(typeof global === "object" ? global : this, function () { "use strict"; var defaultSettings = { alignVert: false, alignHoriz: false, multiLine: false, detectMultiLine: true, minFontSize: 6, maxFontSize: 80, reProcess: true, widthOnly: false, alignVertWithFlexbox: false }; return function textFit(els, options) { if (!options) options = {}; var settings = {}; for (var key in defaultSettings) { if (options.hasOwnProperty(key)) { settings[key] = options[key] } else { settings[key] = defaultSettings[key] } } if (typeof els.toArray === "function") { els = els.toArray() } var elType = Object.prototype.toString.call(els); if (elType !== "[object Array]" && elType !== "[object NodeList]" && elType !== "[object HTMLCollection]") { els = [els] } for (var i = 0; i < els.length; i++) { processItem(els[i], settings) } }; function processItem(el, settings) { if (!isElement(el) || !settings.reProcess && el.getAttribute("textFitted")) { return false } if (!settings.reProcess) { el.setAttribute("textFitted", 1) } var innerSpan, originalHeight, originalHTML, originalWidth; var low, mid, high; originalHTML = el.innerHTML; originalWidth = innerWidth(el); originalHeight = innerHeight(el); if (!originalWidth || !settings.widthOnly && !originalHeight) { if (!settings.widthOnly) throw new Error("Set a static height and width on the target element " + el.outerHTML + " before using textFit!"); else throw new Error("Set a static width on the target element " + el.outerHTML + " before using textFit!") } if (originalHTML.indexOf("textFitted") === -1) { innerSpan = document.createElement("span"); innerSpan.className = "textFitted"; innerSpan.style["display"] = "inline-block"; innerSpan.innerHTML = originalHTML; el.innerHTML = ""; el.appendChild(innerSpan) } else { innerSpan = el.querySelector("span.textFitted"); if (hasClass(innerSpan, "textFitAlignVert")) { innerSpan.className = innerSpan.className.replace("textFitAlignVert", ""); innerSpan.style["height"] = ""; el.className.replace("textFitAlignVertFlex", "") } } if (settings.alignHoriz) { el.style["text-align"] = "center"; innerSpan.style["text-align"] = "center" } var multiLine = settings.multiLine; if (settings.detectMultiLine && !multiLine && innerSpan.scrollHeight >= parseInt(window.getComputedStyle(innerSpan)["font-size"], 10) * 2) { multiLine = true } if (!multiLine) { el.style["white-space"] = "nowrap" } low = settings.minFontSize + 1; high = settings.maxFontSize + 1; while (low <= high) { mid = parseInt((low + high) / 2, 10); innerSpan.style.fontSize = mid + "px"; if (innerSpan.scrollWidth <= originalWidth && (settings.widthOnly || innerSpan.scrollHeight <= originalHeight)) { low = mid + 1 } else { high = mid - 1 } } innerSpan.style.fontSize = mid - 1 + "px"; if (settings.alignVert) { addStyleSheet(); var height = innerSpan.scrollHeight; if (window.getComputedStyle(el)["position"] === "static") { el.style["position"] = "relative" } if (!hasClass(innerSpan, "textFitAlignVert")) { innerSpan.className = innerSpan.className + " textFitAlignVert" } innerSpan.style["height"] = height + "px"; if (settings.alignVertWithFlexbox && !hasClass(el, "textFitAlignVertFlex")) { el.className = el.className + " textFitAlignVertFlex" } } } function innerHeight(el) { var style = window.getComputedStyle(el, null); return el.clientHeight - parseInt(style.getPropertyValue("padding-top"), 10) - parseInt(style.getPropertyValue("padding-bottom"), 10) } function innerWidth(el) { var style = window.getComputedStyle(el, null); return el.clientWidth - parseInt(style.getPropertyValue("padding-left"), 10) - parseInt(style.getPropertyValue("padding-right"), 10) } function isElement(o) { return typeof HTMLElement === "object" ? o instanceof HTMLElement : o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName === "string" } function hasClass(element, cls) { return (" " + element.className + " ").indexOf(" " + cls + " ") > -1 } function addStyleSheet() { if (document.getElementById("textFitStyleSheet")) return; var style = [".textFitAlignVert{", "position: absolute;", "top: 0; right: 0; bottom: 0; left: 0;", "margin: auto;", "display: flex;", "justify-content: center;", "flex-direction: column;", "}", ".textFitAlignVertFlex{", "display: flex;", "}", ".textFitAlignVertFlex .textFitAlignVert{", "position: static;", "}"].join(""); var css = document.createElement("style"); css.type = "text/css"; css.id = "textFitStyleSheet"; css.innerHTML = style; document.body.appendChild(css) } });
+</script>
+
+<script>
 var elem = document.documentElement;
 
 /* View in fullscreen */
@@ -82,6 +90,13 @@ var data = [],
 d3.select("body")
   .on("keypress", function() { openFullscreen(); })
 
+function fit() {
+  var el = document.querySelector('.ack-text');
+  el.style.height = '100%';
+  textFit(el, {maxFontSize: 120, alignVertWithFlexbox: true, alignHoriz: true, multiLine: true});
+  el.style.height = 'auto';
+}
+
 function advance() {
   if (advanceCount % refetchCycle == 0) {
     d3.json("/acks", {credentials: "same-origin"}).then(function(json) {
@@ -96,7 +111,7 @@ function advance() {
     .delay(delay)
     .on("end", function() {
       this.remove();
-      d3.select(".fullscreen").append("span")
+      d3.select(".fullscreen").append("div")
         .attr("class", "ack-text")
         .style("opacity", 0)
         .text(function(d) {
@@ -109,12 +124,15 @@ function advance() {
         })
         .transition()
         .style("opacity", 1)
+        .on("start", fit)
         .on("end", function() {
           advance();
         });
     })
 }
+fit();
 advance();
 
 </script>
 </body>
+</html>
