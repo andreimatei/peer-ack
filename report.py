@@ -22,7 +22,7 @@ class Report(Page):
         handler.end_headers()
         self.common_headers(handler.wfile)
         self.menu_bar(handler.wfile, False)
-        self.write(handler.wfile, "Please log in.")
+        self.write(handler.wfile)
 
     def render_page(self, handler):
         handler.send_response(200)
@@ -31,7 +31,7 @@ class Report(Page):
         self.common_headers(handler.wfile)
         self.write(handler.wfile, "<body>\n")
         user_email = Auth.get_user_email(handler)
-        self.menu_bar(handler.wfile, Util.is_superuser(user_email))
+        self.menu_bar(handler.wfile)
 
         # If there's a report start time specified use that. Otherwise,
         # generate the report according to the current time.

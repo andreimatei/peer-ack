@@ -42,7 +42,7 @@ class MyAcks(Page):
         handler.send_header('Content-type','text/html')
         handler.end_headers()
         self.common_headers(handler.wfile)
-        self.menu_bar(handler.wfile, False)
+        self.menu_bar(handler.wfile)
         self.write(handler.wfile, "Please log in.")
 
     def render_page(self, handler):
@@ -60,7 +60,7 @@ class MyAcks(Page):
         </form>
         """)
         user_email = Auth.get_user_email(handler)
-        self.menu_bar(handler.wfile, Util.is_superuser(user_email))
+        self.menu_bar(handler.wfile)
 
         # If there's a report start time specified use that. Otherwise,
         # generate the report according to the current time.
