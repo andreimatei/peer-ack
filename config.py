@@ -88,7 +88,3 @@ class Util:
         if ts >= push_window_start and ts < cur_week_meeting_dt:
             return cur_week_meeting_dt + datetime.timedelta(minutes=1)
         return ts
-
-    def is_superuser(email):
-        return email in Config.superusers
-

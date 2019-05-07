@@ -99,7 +99,7 @@ class Page:
                 msg, report.start.strftime(fmt), report.end.strftime(fmt), links)
         )
 
-    def menu_bar(self, wfile, superuser):
+    def menu_bar(self, wfile):
         includes = """
             <script src="auth.js"></script>
             <script src="common.js"></script>
@@ -108,9 +108,7 @@ class Page:
         """
         self.write(wfile, includes)
 
-        general_report = ""
-        if superuser:
-            general_report = '<a href="/report" id="report_menu_btn">Report (superuser only)</a>'
+        general_report = '<a href="/report" id="report_menu_btn">Report</a>'
 
         menu = """
         <div id="menu" style="height:30px">

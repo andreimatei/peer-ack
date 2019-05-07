@@ -20,7 +20,7 @@ class Ack(Page):
         self.common_headers(handler.wfile)
         self.write(handler.wfile, "<body>")
         user_email = Auth.get_user_email(handler)
-        self.menu_bar(handler.wfile, Util.is_superuser(user_email))
+        self.menu_bar(handler.wfile)
 
         num_acks, bounty = self.just_inserted(handler)
         if num_acks != 0:
