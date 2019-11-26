@@ -13,6 +13,24 @@ CREATE TABLE ack (
 	CONSTRAINT "primary" PRIMARY KEY (id ASC),
 	FAMILY "primary" (id, msg, inserted_at, user_email)
 )
+
+CREATE TABLE eng_updates (
+      id INT8 NULL,
+      msg STRING NULL,
+      inserted_at TIMESTAMPTZ NULL,
+      user_email STRING NULL,
+      FAMILY "primary" (id, msg, inserted_at, user_email, rowid)
+)
+  
+CREATE TABLE bounties (
+    id INT8 NULL,
+    created TIMESTAMPTZ NULL,
+    updated TIMESTAMPTZ NULL,
+    msg STRING NULL,
+    active BOOL NULL,
+    author STRING NULL,
+    FAMILY "primary" (id, created, updated, msg, active, rowid, author)
+)
 """
 
 class Config:
